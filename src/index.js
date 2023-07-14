@@ -8,22 +8,45 @@ import { getapi, options } from './getAPI';
 const ref = getRefs();
 let valueOfInput = '';
 let currentPage = 1;
+let lightbox = null
 const onFormSubmit = async evt => {
   evt.preventDefault();
   valueOfInput = evt.target.elements.searchQuery.value;
   // console.dir(valueOfInput);
+  currentPage = 1
+  if (valueOfInput.trim()==='') {
+    ref.loadMoreBtn.classList.add('visually-hidden')
+    return
+  }
   const { totalHits, hits } = await getapi(valueOfInput, currentPage);
-  console.log(hits);
+  if (hits.length === 0) {
+    Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+    ref.loadMoreBtn.classList.add('visually-hidden')
+    ref.gallery.innerHTML = '';
+    return;
+}
+ createMarkup(hits)
   ref.gallery.innerHTML = createMarkup(hits);
-  const lightbox = new SimpleLightbox('.gallery a', {});
+  lightbox = new SimpleLightbox('.gallery a', {});
+  lightbox.refresh();
+  ref.loadMoreBtn.classList.remove('visually-hidden')
 };
+
 
 const onLoadClick = async () => {
   currentPage += 1;
   const { totalHits, hits } = await getapi(valueOfInput, currentPage);
   const totalPages = Math.ceil(totalHits / 40);
   ref.gallery.insertAdjacentHTML('beforeend', createMarkup(hits));
-  const lightbox = new SimpleLightbox('.gallery a', {});
+  lightbox = new SimpleLightbox('.gallery a', {});
+  if (currentPage >= totalPages) {
+    ref.loadMoreBtn.classList.add('visually-hidden');
+    Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+} else {
+    ref.loadMoreBtn.classList.remove('visually-hidden')
+}
+
+  lightbox.refresh();
 };
 
 ref.formEl.addEventListener('submit', onFormSubmit);
