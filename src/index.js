@@ -8,49 +8,50 @@ import { getapi, options } from './getAPI';
 const ref = getRefs();
 let valueOfInput = '';
 let currentPage = 1;
-let lightbox = null
-const initLightbox = () => {
-  lightbox = new SimpleLightbox('.gallery a', {});
-};
-ref.loadMoreBtn.classList.add('visually-hidden')
+const lightbox = new SimpleLightbox('.gallery a', {});
+
+ref.loadMoreBtn.classList.add('visually-hidden');
 const onFormSubmit = async evt => {
   evt.preventDefault();
   valueOfInput = evt.target.elements.searchQuery.value;
   // console.dir(valueOfInput);
-  currentPage = 1
-  if (valueOfInput.trim()==='') {
-    Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-    ref.loadMoreBtn.classList.add('visually-hidden')
-    return
+  currentPage = 1;
+  if (valueOfInput.trim() === '') {
+    Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.'
+    );
+    ref.loadMoreBtn.classList.add('visually-hidden');
+    return;
   }
   const { totalHits, hits } = await getapi(valueOfInput, currentPage);
   if (hits.length === 0) {
-    Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-    ref.loadMoreBtn.classList.add('visually-hidden')
+    Notiflix.Notify.failure(
+      'Sorry, there are no images matching your search query. Please try again.'
+    );
+    ref.loadMoreBtn.classList.add('visually-hidden');
     ref.gallery.innerHTML = '';
     return;
-}
- createMarkup(hits)
+  }
+  createMarkup(hits);
   ref.gallery.innerHTML = createMarkup(hits);
-  initLightbox()
   lightbox.refresh();
-  ref.loadMoreBtn.classList.remove('visually-hidden')
+  ref.loadMoreBtn.classList.remove('visually-hidden');
 };
-
 
 const onLoadClick = async () => {
   currentPage += 1;
   const { totalHits, hits } = await getapi(valueOfInput, currentPage);
   const totalPages = Math.ceil(totalHits / 40);
   ref.gallery.insertAdjacentHTML('beforeend', createMarkup(hits));
-  
+
   if (currentPage >= totalPages) {
     ref.loadMoreBtn.classList.add('visually-hidden');
-    Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
-} else {
-    ref.loadMoreBtn.classList.remove('visually-hidden')
-}
-  initLightbox()
+    Notiflix.Notify.info(
+      "We're sorry, but you've reached the end of search results."
+    );
+  } else {
+    ref.loadMoreBtn.classList.remove('visually-hidden');
+  }
   lightbox.refresh();
 };
 
