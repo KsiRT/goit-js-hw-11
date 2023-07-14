@@ -9,6 +9,10 @@ const ref = getRefs();
 let valueOfInput = '';
 let currentPage = 1;
 let lightbox = null
+const initLightbox = () => {
+  lightbox = new SimpleLightbox('.gallery a', {});
+};
+ref.loadMoreBtn.classList.add('visually-hidden')
 const onFormSubmit = async evt => {
   evt.preventDefault();
   valueOfInput = evt.target.elements.searchQuery.value;
@@ -28,7 +32,7 @@ const onFormSubmit = async evt => {
 }
  createMarkup(hits)
   ref.gallery.innerHTML = createMarkup(hits);
-  lightbox = new SimpleLightbox('.gallery a', {});
+  initLightbox()
   lightbox.refresh();
   ref.loadMoreBtn.classList.remove('visually-hidden')
 };
@@ -39,14 +43,14 @@ const onLoadClick = async () => {
   const { totalHits, hits } = await getapi(valueOfInput, currentPage);
   const totalPages = Math.ceil(totalHits / 40);
   ref.gallery.insertAdjacentHTML('beforeend', createMarkup(hits));
-  lightbox = new SimpleLightbox('.gallery a', {});
+  
   if (currentPage >= totalPages) {
     ref.loadMoreBtn.classList.add('visually-hidden');
     Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
 } else {
     ref.loadMoreBtn.classList.remove('visually-hidden')
 }
-
+  initLightbox()
   lightbox.refresh();
 };
 
